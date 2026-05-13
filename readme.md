@@ -11,8 +11,8 @@ This bash script exercises the full partner-to-seller flow against the ShipStati
 6. Re-run the script to add additional sub-accounts
 
 ### Prerequisites
-* `jq` must be installed on your machine (e.g., `brew install jq`).
-* A valid ShipStation API Partner Sandbox API Key.
+* `jq` must be installed on your machine (e.g. `brew install jq`).
+* A valid ShipStation API Partner Sandbox API Key (e.g. TEST_XXXXXX)
 
 ### How to Run
 Provide your sandbox API key as an environment variable when executing the script:
