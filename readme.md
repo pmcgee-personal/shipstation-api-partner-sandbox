@@ -21,3 +21,4 @@ chmod +x partner-sandbox-demo.sh
 export PARTNER_API_KEY="your_partner_sandbox_key"
 ./partner-sandbox-demo.sh
 
+Re-run the script to add additional accounts linked to your Partner API key
