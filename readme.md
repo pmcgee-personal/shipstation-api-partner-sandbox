@@ -8,7 +8,7 @@ This bash script exercises the full partner-to-seller flow against the ShipStati
 3. Registers three carriers for the seller: Stamps.com (USPS), DHL Express and UPS.
 4. Generates domestic and international rates.
 5. Generates test shipping labels for the selected rates.
-6. Re-run the script to add additional accounts linked to the Partner API key
+6. Re-run the script to add additional sub-accounts
 
 ### Prerequisites
 * `jq` must be installed on your machine (e.g., `brew install jq`).
