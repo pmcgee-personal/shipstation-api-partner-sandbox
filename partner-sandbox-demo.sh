@@ -4,10 +4,8 @@
 #
 # Exercises the full partner -> seller -> carrier registration -> rate -> label flow
 # against the ShipStation API using a sandbox partner account.
-#
-# Due to a bug with sandbox accounts, they are not immediately available. This is
-# currently being worked on by the development team. For now this script waits 30
-# seconds after account creation for propagation, then runs all steps without retrying.
+# Note that the sandbox environment has some limitations and may not perfectly reflect production behavior, especially around account creation and carrier registration. In a real integration, you would want to implement retry logic and more robust error handling to account for eventual consistency and other issues.
+# For now this script waits 30 seconds after account creation for propagation, then runs all steps without retrying.
 #
 # Required env vars:
 #   PARTNER_API_KEY  - API key for the sandbox partner account
