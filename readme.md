@@ -23,7 +23,8 @@ Provide your sandbox API key as an environment variable when executing the scrip
 ```bash
 chmod +x partner-sandbox-demo.sh
 export PARTNER_API_KEY="your_partner_sandbox_key"
-./partner-sandbox-demo.sh ```
+./partner-sandbox-demo.sh
+```
 
 ### Acknowledgements
 * Original script provided by Auctane Co-Worker for testing the ShipStation API Partner Sandbox flow.
