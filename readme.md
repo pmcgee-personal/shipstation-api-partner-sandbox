@@ -8,7 +8,7 @@ This bash script exercises the full partner-to-seller flow against the ShipStati
 3. Registers three carriers for the seller: Stamps.com (USPS), DHL Express and UPS.
 4. Generates domestic and international rates.
 5. Generates test shipping labels for the selected rates.
-6. Re-run the script to add additional accounts linked to the Partner API key
+6. Re-run the script to add additional sub-accounts.
 
 ### Prerequisites
 * `jq` must be installed on your machine (e.g., `brew install jq`).
@@ -21,3 +21,8 @@ Provide your sandbox API key as an environment variable when executing the scrip
 chmod +x partner-sandbox-demo.sh
 export PARTNER_API_KEY="your_partner_sandbox_key"
 ./partner-sandbox-demo.sh
+
+### Acknowledgements
+* Original script provided by Auctane Co-Worker for testing the ShipStation API Partner Sandbox flow.
+* Maintained by Peter McGee.
+
