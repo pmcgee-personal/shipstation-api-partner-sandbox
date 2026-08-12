@@ -75,21 +75,23 @@ EOF
 read -r -d '' PACKAGE << 'EOF' || true
 {
   "weight": {"value": 1.0, "unit": "pound"},
-  "dimensions": {"length": 6.0, "width": 4.0, "height": 3.0, "unit": "inch"}
+  "dimensions": {"length": 6.0, "width": 4.0, "height": 3.0, "unit": "inch"},
+  "products": [
+    {
+      "description": "Test item",
+      "quantity": 1,
+      "value": {"amount": 25.00, "currency": "USD"},
+      "country_of_origin": "US",
+      "harmonized_tariff_code": "6204620000",
+      "sku": "TEST-SKU-001"
+    }
+  ]
 }
 EOF
 
 read -r -d '' CUSTOMS << 'EOF' || true
 {
   "contents": "merchandise",
-  "customs_items": [
-    {
-      "description": "Test item",
-      "quantity": 1,
-      "value": {"amount": 25.00, "currency": "USD"},
-      "country_of_origin": "US"
-    }
-  ],
   "non_delivery": "return_to_sender"
 }
 EOF
