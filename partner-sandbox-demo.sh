@@ -2,10 +2,19 @@
 #
 # Partner Sandbox Demo
 #
-# Exercises the full partner -> seller -> carrier registration -> rate -> label flow
-# against the ShipStation API using a sandbox partner account.
-# Note that the sandbox environment has some limitations and may not perfectly reflect production behavior, especially around account creation and carrier registration. In a real integration, you would want to implement retry logic and more robust error handling to account for eventual consistency and other issues.
-# For now this script waits 30 seconds after account creation for propagation, then runs all steps without retrying.
+# This script demonstrates the complete flow to reach the point where you can
+# request shipping rates and create labels in the ShipStation partner API.
+#
+# FLOW:
+#   1. Create a seller account
+#   2. Create a warehouse (with origin address)
+#   3. Register shipping carriers (enable rating/label services)
+#   4. Request rates and create labels using the registered carriers
+#
+# The script exercises this flow against the sandbox API using a partner
+# account. Note: the sandbox environment has eventual consistency delays
+# and may not perfectly reflect production behavior. In a real integration,
+# implement retry logic and robust error handling.
 #
 # Required env vars:
 #   PARTNER_API_KEY  - API key for the sandbox partner account
@@ -131,7 +140,13 @@ seller_post() {
   echo "  ${HTTP_CODE} OK"
 }
 
-# --- Step 1: Create account ---
+# --- Step 1: Create a seller account ---
+#
+# A seller account is the foundation for all subsequent operations. This
+# represents a customer who will use ShipStation to ship packages. The
+# partner creates accounts on behalf of their sellers, and then uses the
+# account_id to perform operations as that seller (via on-behalf-of header).
+#
 
 UNIQUE=$(uuidgen | tr '[:upper:]' '[:lower:]' | cut -c1-8)
 partner_post "${BASE_URL}/v1/partners/accounts" \
@@ -148,10 +163,17 @@ echo "  Account ID: ${ACCOUNT_ID}"
 
 echo ""
 echo "=== Waiting 30 seconds for account propagation..."
+echo "  (Sandbox has eventual consistency; we wait for the account to be"
+echo "   fully initialized before proceeding. In production, implement polling.)"
 sleep 30
 echo "  Done waiting."
 
-# --- Step 2: Create warehouse ---
+# --- Step 2: Create a warehouse ---
+#
+# A warehouse represents a physical location from which packages are shipped.
+# It defines the origin address used for rating and labeling. From this point
+# forward, all requests use the on-behalf-of header to act as the seller.
+#
 
 seller_post "${BASE_URL}/v1/warehouses" \
   "{
@@ -163,7 +185,15 @@ seller_post "${BASE_URL}/v1/warehouses" \
 WAREHOUSE_ID=$(echo "$BODY" | jq -r '.warehouse_id')
 echo "  Warehouse ID: ${WAREHOUSE_ID}"
 
-# --- Step 3: Register Stamps.com ---
+# --- Steps 3-5: Register shipping carriers ---
+#
+# Carriers are the shipping services (USPS, UPS, DHL, etc.) that will provide
+# rates and print labels for the seller. Before you can request rates, you must
+# register at least one carrier. Each carrier returns a carrier_id that you use
+# in rate and label requests.
+#
+
+# Step 3: Register Stamps.com (provides USPS services)
 
 UNIQUE=$(uuidgen | tr '[:upper:]' '[:lower:]' | cut -c1-8)
 seller_post "${BASE_URL}/v1/registration/stamps_com" \
@@ -177,7 +207,7 @@ seller_post "${BASE_URL}/v1/registration/stamps_com" \
 STAMPS_CARRIER_ID=$(echo "$BODY" | jq -r '.carrier_id')
 echo "  Carrier ID: ${STAMPS_CARRIER_ID}"
 
-# --- Step 4: Register DHL Express Walleted ---
+# Step 4: Register DHL Express
 
 UNIQUE=$(uuidgen | tr '[:upper:]' '[:lower:]' | cut -c1-8)
 seller_post "${BASE_URL}/v1/registration/dhl_express_walleted" \
@@ -186,7 +216,7 @@ seller_post "${BASE_URL}/v1/registration/dhl_express_walleted" \
 DHL_CARRIER_ID=$(echo "$BODY" | jq -r '.carrier_id')
 echo "  Carrier ID: ${DHL_CARRIER_ID}"
 
-# --- Step 5: Register UPS ---
+# Step 5: Register UPS
 
 UNIQUE=$(uuidgen | tr '[:upper:]' '[:lower:]' | cut -c1-8)
 seller_post "${BASE_URL}/v1/registration/ups" \
@@ -204,7 +234,13 @@ seller_post "${BASE_URL}/v1/registration/ups" \
 UPS_CARRIER_ID=$(echo "$BODY" | jq -r '.carrier_id')
 echo "  Carrier ID: ${UPS_CARRIER_ID}"
 
-# --- Step 6: Get rates and create labels for each carrier ---
+# --- Step 6: Request rates and create labels ---
+#
+# Now that you have registered carriers, you can request shipping rates by
+# passing a carrier_id, and create labels using the selected rate. This is
+# the endpoint of the flow—from here you have everything needed to integrate
+# shipping into your application.
+#
 
 ANY_FAILED=false
 
@@ -318,4 +354,16 @@ if [[ "$ANY_FAILED" == "true" ]]; then
   exit 1
 fi
 echo ""
-echo "=== All carriers completed successfully."
+echo "=== All steps completed successfully ==="
+echo ""
+echo "You now have:"
+echo "  Account ID:      ${ACCOUNT_ID}"
+echo "  Warehouse ID:    ${WAREHOUSE_ID}"
+echo "  USPS Carrier ID: ${STAMPS_CARRIER_ID}"
+echo "  DHL Carrier ID:  ${DHL_CARRIER_ID}"
+echo "  UPS Carrier ID:  ${UPS_CARRIER_ID}"
+echo ""
+echo "Next steps:"
+echo "  - Use these carrier IDs in /v1/rates requests to get available services"
+echo "  - Pass a selected rate to /v1/labels to create a shipping label"
+echo "  - See the API docs for full rate/label request and response details"
