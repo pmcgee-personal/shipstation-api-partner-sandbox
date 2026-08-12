@@ -11,10 +11,9 @@
 #   3. Register shipping carriers (enable rating/label services)
 #   4. Request rates and create labels using the registered carriers
 #
-# The script exercises this flow against the sandbox API using a partner
+# The script exercises this flow against the ShipStation API using a partner sandbox
 # account. Note: the sandbox environment has eventual consistency delays
-# and may not perfectly reflect production behavior. In a real integration,
-# implement retry logic and robust error handling.
+# and may not perfectly reflect production behavior. Additionally, sandbox does not support all features and functions of ShipStation API
 #
 # Required env vars:
 #   PARTNER_API_KEY  - API key for the sandbox partner account
@@ -145,7 +144,7 @@ seller_post() {
 # A seller account is the foundation for all subsequent operations. This
 # represents a customer who will use ShipStation to ship packages. The
 # partner creates accounts on behalf of their sellers, and then uses the
-# account_id to perform operations as that seller (via on-behalf-of header).
+# account_id or api key to perform operations as that seller (via on-behalf-of header).
 #
 
 UNIQUE=$(uuidgen | tr '[:upper:]' '[:lower:]' | cut -c1-8)
@@ -164,7 +163,7 @@ echo "  Account ID: ${ACCOUNT_ID}"
 echo ""
 echo "=== Waiting 30 seconds for account propagation..."
 echo "  (Sandbox has eventual consistency; we wait for the account to be"
-echo "   fully initialized before proceeding. In production, implement polling.)"
+echo "   fully initialized before proceeding.)"
 sleep 30
 echo "  Done waiting."
 
@@ -296,7 +295,7 @@ get_rates_and_label() {
     return
   fi
 
-  echo "$rates" | jq -r '.[] | "  \(.service_code) @ $\(.shipping_amount.amount)"'
+  echo "$rates" | jq -r '.[] | "  \(.service_code) [\(.package_type)] @ $\(.shipping_amount.amount)"'
 
   local selected_service selected_carrier_id
   selected_service=$(echo "$rates" | jq -r '.[0].service_code')
@@ -366,4 +365,5 @@ echo ""
 echo "Next steps:"
 echo "  - Use these carrier IDs in /v1/rates requests to get available services"
 echo "  - Pass a selected rate to /v1/labels to create a shipping label"
-echo "  - See the API docs for full rate/label request and response details"
+echo "  - Use the Partner API documentation to explore managing seller accounts (https://docs.shipstation.com/apis/shipengine/docs/partners/partner-integration-guide)"
+echo "  - Use the ShipStation API documentation to explore managing shipments, labels, tracking and more (https://docs.shipstation.com/apis/shipengine/docs/getting-started/get-started)"
