@@ -16,7 +16,7 @@ This bash script exercises the full partner-to-seller flow against the ShipStati
 - `jq` must be installed on your machine (e.g. `brew install jq`).
 - A valid ShipStation API Partner Sandbox API Key (e.g. TEST_XXXXXX)
 
-### How to Run
+### How to Run Locally
 
 Provide your sandbox API key as an environment variable when executing the script:
 
@@ -24,6 +24,15 @@ Provide your sandbox API key as an environment variable when executing the scrip
 chmod +x partner-sandbox-demo.sh
 export PARTNER_API_KEY="your_partner_sandbox_key"
 ./partner-sandbox-demo.sh
+```
+
+### How to Run in Docker
+
+Build and run the container:
+
+```bash
+docker build -t shipstation-partner-sandbox .
+docker run --rm -e PARTNER_API_KEY="your_partner_sandbox_key" shipstation-partner-sandbox
 ```
 
 ### Acknowledgements
